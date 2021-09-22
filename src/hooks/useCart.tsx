@@ -1,3 +1,4 @@
+import { exists } from "fs";
 import { createContext, ReactNode, useContext, useState } from "react";
 import { toast } from "react-toastify";
 import { api } from "../services/api";
@@ -34,16 +35,17 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
   const addProduct = async (productId: number) => {
     try {
-      cart.map(product => {
-        if(product.id === productId) {
-          return product.amount++;
-        }
-      })
+      const productExists = cart.find(product => product.id === productId);
 
-      const newProduct = cart.findIndex(product => productId === product.id );
+      if(productExists) {
+        setCart(cart.map(product =>
+          product.id === productId ? { ...product, amount: product.amount + 1 } : product
+        ));
+      } else {
+        const response = await api.get<Product>(`/products/${productId}`);
 
-      console.log(newProduct);
-
+        
+      }
       
 
       localStorage.setItem("@RocketShoes:cart", JSON.stringify(cart));
